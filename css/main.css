@@ -1,0 +1,162 @@
+body{
+    background: rgb(136, 184, 160);
+}
+#map{
+    width: 100%;
+    height: 600px;
+    background-color: gray;
+    z-index: 0;
+}
+#loading{
+    position: fixed;
+    display: block;
+    z-index: 999;
+    left: 35%;
+    top: 50%;
+    font-size: 36px;
+    font-weight: 800;
+    opacity: 0;
+    transition: 1s;
+}
+.loading-content {
+background-color: rgb(218, 250, 189);
+margin: auto;
+padding: 5px;
+border: 2px solid rgb(198, 214, 181);
+border-radius: 5px;
+}
+main{
+    position: relative;
+    font-size: 0;
+}
+.menu-header{ 
+    width: 100%;
+    height: 80px;
+    padding: 20px;
+    margin: 0;
+    background-color: darkslategrey;
+    position: relative;
+    z-index: 999;
+
+}
+.menu-header h2{
+    font-size: 24px;
+    display: inline-block;
+    vertical-align:top;
+    color: rgb(78, 157, 184);
+    font-weight: 800;
+}
+.menu{
+    position: relative;
+}
+.menu-btn{
+    height: 40px;
+    width: 40px;
+    background-color: lightslategrey;
+    position: relative;
+    display: inline-block;
+    border: 2px solid rgb(180, 192, 214);
+    border-radius: 3px ;
+}
+.menu-off{
+    top: 80px;
+}
+.menu-btn:before{
+    content: '';
+    position: absolute;
+    width: 32px;
+    height: 2px;
+    background: #000;
+    left: 2px;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    box-shadow: 0px 10px 0px #000,0px -10px 0px #000;
+} 
+nav{
+    height: 80px;
+    width: 100%;
+    display: block;
+    background-color: lightslategray;
+    position: absolute;
+    border:2px solid deepskyblue;
+    top: 0;
+    text-align: center;
+    z-index: 1;
+    transition: 0.5s;
+}
+nav label {
+    display: block;
+}
+nav button{
+    margin: 5px;
+}
+
+.search-radius{
+    font-size: 18px;
+    margin-top: 3px;
+    font-weight: 700;
+}
+
+.search-radius i{
+    color:rgb(199, 153, 112)
+}
+
+.search-radius :nth-child(1){
+    color: rgb(92, 224, 185);
+}
+
+.search-radius :nth-child(3),.search-radius :nth-child(4){
+    color: rgb(35, 87, 155);
+}
+
+.search-btn {
+    display: inline-block;
+    margin-top: -4px;
+    font-weight: 700;
+}
+
+body h1{
+    font-size: 32px;
+    text-align: center;
+    color: steelblue;
+    font-weight: 700;
+    background-color: rgb(240, 205, 159);
+    padding: 5px;
+    margin: 0;
+}
+body h1 small{
+    display: block;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.gm-style .gm-style-iw {
+    font-size: 16px;
+}
+
+@media screen and (min-width: 768px){
+    .menu-header{
+        display: inline-block;
+        width: 30%;
+    }
+
+    .menu{
+        border:2px solid deepskyblue;
+    }
+
+    nav{
+        height: 80px;
+        width: 70%;
+        display: inline-block;
+        background-color: lightslategray;
+        border: none;
+        top: 0;
+        text-align: center;
+        z-index: 999;
+    }
+
+    .menu-btn {
+        display:none
+    }
+}
