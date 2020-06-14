@@ -37,7 +37,5 @@ bootstrap 4
 * 關於Google maps API
   - 用量控制，務必設定API金鑰限制控管流量。
   - Google maps api的請求為20個/秒，超過會出現OVER_QUERY_LIMIT，目前看來只能用用延遲來處理請求數量。
-* 關於bootstrap4
-  - 互動視窗(modal)似乎是調用bootstrap4的函式呼叫，無法由Vue來進行控制(待確認)。
 * 關於Javascript
   - 注意clocure，確保各個變數的作用域，取得正確的結果。  
