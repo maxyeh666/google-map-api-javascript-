@@ -20,8 +20,7 @@ https://maxyeh666.github.io/google-map-api-javascript-/
 HTML  
 CSS  
 Javascript  
-Jquery  
-Vue框架  
+Jquery    
 bootstrap 4  
 * Google maps api
   - Maps JavaScript API
@@ -38,9 +37,6 @@ bootstrap 4
 * 關於Google maps API
   - 用量控制，務必設定API金鑰限制控管流量。
   - Google maps api的請求為20個/秒，超過會出現OVER_QUERY_LIMIT，目前看來只能用用延遲來處理請求數量。
-* 關於Vue
-  - 注意Vue的整體觀念，由資料的變動來改變rnder，不再是直接操縱DOM。
-  - Vue裡面大多使用this來調用各種函式與變數，使用時務必注意this的指向。
 * 關於bootstrap4
   - 互動視窗(modal)似乎是調用bootstrap4的函式呼叫，無法由Vue來進行控制(待確認)。
 * 關於Javascript
