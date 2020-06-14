@@ -1,4 +1,4 @@
-# googlemap api串接實做 with Javascript
+# Google maps串接實做 with Javascript
 https://maxyeh666.github.io/google-map-api-javascript-/  
 
 有對應RWD(breakpoint<768),下方QRcode可以觀看效果  
