@@ -3,23 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GoogleMap應用</title>
+    <title>GoogleMap API串接實作</title>
     
     <!-- CSS reset -->
     <link rel="stylesheet" href="css/css_reset.css">
+
     <!-- bootstrap4 -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    
     <!-- 讀取css -->
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <h1>GoogleMpa應用實作<small>-搜尋正在營業中的目標項目-</small> </h1>
+    <h1>GoogleMap API串接實作<small>-搜尋指定目標項目-</small> </h1>
     <input type="checkbox" id="menu-switch" hidden>
     <div class="main">
         <div class="menu">
             <label for="menu-switch" class="menu-header">            
                 <div class="menu-btn"></div>
-                <span><h2>搜尋選單</h2></span>
+                <h2>搜尋選單</h2>
             </label>
             <nav>
                 <label class="search-radius">
@@ -35,16 +37,32 @@
             </nav>
         </div>
         <div id="map"></div>
-    </div>
+
+        <div class="card mb-3 position-relative">
+            <div class="card-header">
+                <h3 class="card-title d-inline">地點清單</h3>
+                <span class="ml-3">點擊下方按鈕取得詳細資料</span>
+                <button type="button" class="btn badge-info more">載入更多地點...</button>
+            </div>
+            <div class="card-body">
+                    <div class="search-item overflow-auto"></div>
+                </div>
+            </div>
+        </div>
 
     <!-- 讀取視窗 -->
     <label id="loading">
-        <div class="loading-content"> 讀取中...</div>
+        <div class="loading-content">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <span>讀取中...</span> 
+        </div>
     </label>
 
     <!-- 彈出視窗 -->
     <div class="modal fade" id="Modal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                 <h5 class="modal-title" id="ModalLabel">提示視窗</h5>
@@ -60,28 +78,23 @@
             </div>
         </div>
     </div>
-    
-
 
 
     <!-- googlemap -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEX26IdniZZ90EAdq__3L6oY1NgU91vOg&libraries=places"></script>
-
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBaJdT7gDFP-8wcs2Eguqb8wIeW_FTGw8k&libraries=places"></script>
 
     <!-- jquery -->
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
 
     <!-- 主要javascript -->
     <script src="./js/main.js"></script>
+
     <!-- bootstrap4 -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
-    <!-- vue.js -->
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.11/vue.common.js'></script>
+    
     <!-- fontawsome -->
     <script src="https://kit.fontawesome.com/d17db0e822.js" crossorigin="anonymous"></script>
-
-
     <script>
         (function($){
             initMap()

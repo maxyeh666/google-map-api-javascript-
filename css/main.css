@@ -1,29 +1,41 @@
 body{
-    background: rgb(136, 184, 160);
+    box-sizing: border-box;
 }
 #map{
     width: 100%;
-    height: 600px;
+    height: calc((100vh - 80px - 80px)*0.6);
     background-color: gray;
     z-index: 0;
 }
+.card > .card-header > .more{
+    display:none;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    opacity: 0;
+}
 #loading{
     position: fixed;
-    display: block;
+    display: none;
+    width: 240px;
     z-index: 999;
-    left: 35%;
-    top: 50%;
+    left: 50%;
+    top: 40%;
+    margin-left: -120px;
     font-size: 36px;
     font-weight: 800;
+    text-align: center;
     opacity: 0;
     transition: 1s;
 }
 .loading-content {
-background-color: rgb(218, 250, 189);
-margin: auto;
-padding: 5px;
-border: 2px solid rgb(198, 214, 181);
-border-radius: 5px;
+    background-color: rgb(218, 250, 189);
+    padding: 10px;
+    border: 2px solid rgb(198, 214, 181);
+    border-radius: 5px;
+}
+#loading .spinner-border{
+    vertical-align: inherit;
 }
 main{
     position: relative;
@@ -40,11 +52,11 @@ main{
 
 }
 .menu-header h2{
-    font-size: 24px;
+    margin: auto;
     display: inline-block;
-    vertical-align:top;
     color: rgb(78, 157, 184);
     font-weight: 800;
+    vertical-align: top;
 }
 .menu{
     position: relative;
@@ -91,21 +103,17 @@ nav label {
 nav button{
     margin: 5px;
 }
-
 .search-radius{
     font-size: 18px;
     margin-top: 3px;
     font-weight: 700;
 }
-
 .search-radius i{
     color:rgb(199, 153, 112)
 }
-
 .search-radius :nth-child(1){
     color: rgb(92, 224, 185);
 }
-
 .search-radius :nth-child(3),.search-radius :nth-child(4){
     color: rgb(35, 87, 155);
 }
@@ -115,9 +123,9 @@ nav button{
     margin-top: -4px;
     font-weight: 700;
 }
-
 body h1{
     font-size: 32px;
+    height: 80px;
     text-align: center;
     color: steelblue;
     font-weight: 700;
@@ -131,18 +139,27 @@ body h1 small{
     font-weight: 700;
 }
 
-.gm-style .gm-style-iw {
-    font-size: 16px;
+.card .card-header span{
+    font-size: 1rem;
+    color: olive;
 }
 
+.position-list{
+    background-color: #ddd;
+}
+
+.gm-style .gm-style-iw {
+    font-size: 1.25rem;
+}
+
+.search-item {
+    width: 100%;
+    height: calc((100vh - 80px - 80px)*0.19);
+}
 @media screen and (min-width: 768px){
     .menu-header{
         display: inline-block;
         width: 30%;
-    }
-
-    .menu{
-        border:2px solid deepskyblue;
     }
 
     nav{

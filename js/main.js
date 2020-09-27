@@ -5,7 +5,7 @@
 //設定環境變數
 let process = {
     env:{
-        server: 'dev'
+        server: 'prod'
     }
 }
 
@@ -29,21 +29,24 @@ let map
 let service
 //搜尋半徑
 let radius
-//取得下一頁
-let getNextPage = null
 //原有的資料
 let getData
 //新取得的資料
 let newData
 //圖標
 let marker
+// 向google map api發送請求
+let request
 
 //初始化執行
 function initMap(){
     if(navigator.geolocation){
         $('#search').html(searchRadius[0])
-        ResetLocal()
-        GetCurrentPos()
+        ResetLocal('search')
+        ResetLocal('search_results')
+        $('.search-item').html('尚未搜尋')
+        Position()
+        CurrentPos()
     }else(
         modal('裝置不支援!')
     )
@@ -56,25 +59,38 @@ function initMap(){
 //根據按鈕觸發相對應是件
 $(document).click(function(event){
     if(event.target == $('#getPos')[0]){
-        GetCurrentPos()
-        ResetLocal()
+        $('.search-item').html('尚未搜尋')
+        Position()
+        CurrentPos()
+        ResetLocal('search')
     }else if(event.target == $('.menu-btn')[0]){
         $('nav').toggleClass('menu-off')
     }else if(event.target == $('#restaurant')[0]){
-        CurrentPos(currentLocation,map)
-        GetPosTarget('restaurant',currentLocation,map)
+        //先清空資料避免不停重複輸出
+        $('.search-item').html('')
+        CurrentPos()
+        GetPosTarget('restaurant')
+        NearBySearchAPI(request)
     }else if(event.target == $('#tourist_attraction')[0]){
-        CurrentPos(currentLocation,map)
-        GetPosTarget('tourist_attraction',currentLocation,map)
+        //先清空資料避免不停重複輸出
+        $('.search-item').html('')
+        CurrentPos()
+        GetPosTarget('tourist_attraction')
+        NearBySearchAPI(request)
     }else if(event.target == $('#gas_station')[0]){
-        CurrentPos(currentLocation,map)
-        GetPosTarget('gas_station',currentLocation,map)
+        //先清空資料避免不停重複輸出
+        $('.search-item').html('')
+        CurrentPos()
+        GetPosTarget('gas_station')
+        NearBySearchAPI(request)
     }else if(event.target == $('.arrow-left')[0]){
         SearchRadiusChange(-1)
-        ResetLocal()
+        ResetLocal('search')
+        ResetLocal('search_results')
     }else if(event.target == $('.arrow-right')[0]){
         SearchRadiusChange(1)
-        ResetLocal()
+        ResetLocal('search')
+        ResetLocal('search_results')
     }
 })
 
@@ -82,12 +98,164 @@ $(document).click(function(event){
 -----------   函式區   -----------
 --------------------------------*/
 
-//取得定位資料
+
+/* 基礎函式 */
+
+// 延遲用的sleep函式
+//利用ES6的Promise執行一個指定(time)的延遲
+function sleep(time){
+    return new Promise((resolve) => {
+        setTimeout(resolve,time)
+    })
+}
+
+//  取得定位資料
 function Position(){
     // navigator.geolocation.getCurrentPosition為HTML5中的Geolocation API使用瀏覽器取得定位
     // getCurrentPosition(執行成功函式,執行失敗函式)
     navigator.geolocation.getCurrentPosition(GetPosSuccess,GetPosError)
+    log('取得位置!')
 }
+
+//  呼叫google map api將目前位置放置於地圖上
+function CurrentPos(){
+    currentLocation = JSON.parse(localStorage.getItem('location'))
+    map = new google.maps.Map(document.querySelector('#map'),{zoom: 16,center:currentLocation})
+    //設定目前位置座標
+    let marker = new google.maps.Marker({
+        position:currentLocation,
+    })
+    //設定infowindow
+    let infowindow = new google.maps.InfoWindow({
+        content : '<div class="currentPos">目前位置</div>'
+    })
+    //開啟infowindow
+    infowindow.open(map,marker)  
+    marker.addListener('click', function() {
+            infowindow.open(map,marker)
+    })
+    //指定圖標要出現的地圖
+    marker.setMap(map)
+
+    log('定位成功!')
+}
+
+//  設定搜尋半徑
+function SearchRadiusChange(value){
+    let setRadius = Number($('#search').text())
+    let changeIndex = (searchRadius.indexOf(setRadius) + value + searchRadius.length) % searchRadius.length
+    index = searchRadius[changeIndex]
+
+    return $('#search').html(searchRadius[changeIndex])
+}
+
+//  重置localstorage中的search陣列
+function ResetLocal(localdata){
+    localStorage.setItem(localdata,'[]')
+
+    log(`清除${localdata}!`)
+}
+
+//搜尋半徑顯示
+function RadiusCircle(){
+    return new google.maps.Circle({
+        strokeColor: '#00bfff',
+        strokeOpacity: 0.5,
+        strokeWeight: 2,
+        fillColor: '#87cefa',
+        fillOpacity: 0.35,
+        map: map,
+        center: currentLocation,
+        radius: Number(radius)
+    });
+}
+
+//  取得目標位置
+function GetPosTarget(target){
+    radius = $('#search').text()
+
+    //發送要給nearbysearch請求的內容
+    request = {
+        location: currentLocation,
+        radius: radius,
+        type: [target],
+    }
+
+    RadiusCircle()
+
+    log('目標地點取得')
+}
+
+//取得placeId後存入localstorage,之後由Place libery:Details取得更詳細資料
+function getDetails(place){
+    let position = JSON.parse(localStorage.getItem('search'))
+
+    let data = {placeId:place.place_id}
+
+    position.push(data)
+    newData = JSON.stringify(position)
+    localStorage.setItem('search',newData)
+    log('placeId寫入完成')
+
+    let detailRequest = data
+
+    service = new google.maps.places.PlacesService(map);
+    service.getDetails(detailRequest, Details)
+    log('取得詳細資料API')
+}
+
+// 呼叫google map api使用Place libery:Nearby Search Request
+function NearBySearchAPI(nearbyrequest){
+    service = new google.maps.places.PlacesService(map)
+    service.nearbySearch(nearbyrequest, NearBySearch)
+
+    $('#loading').css({'opacity':'1','display':'block'})
+}
+
+// bootstrap4彈出式提示視窗
+function modal(content){
+    $('#Modal').modal('show')
+    $('.modal-body').html(content)
+}
+
+// 清單點擊資料綁定
+function ListClick(){
+    let btn = document.querySelectorAll('.place')
+    
+    btn.forEach((results,index) => {
+        results.addEventListener('click', () =>{
+            let getData = JSON.parse(localStorage.getItem('search_results'))
+
+            let infowindowContent = 
+            `
+            <div>名稱:${getData[index].name}</div>
+            <div>評價:${getData[index].rating}<i class="fas fa-star"></i></div>
+            <div>地址:${getData[index].address}</div>
+            <div>連絡電話:${getData[index].phone_number}</div>
+            <div><a href="${getData[index].url}">googlemap中開啟</a></div>
+            `
+
+            // 提高zIndex讓訊息視窗
+            infowindow = new google.maps.InfoWindow(
+                {
+                    content: infowindowContent,
+                    zIndex: 9999,
+                }           
+            )
+
+            marker = new google.maps.Marker({
+                position: getData[index].location,
+                map: map,
+            })
+            
+            infowindow.open(map, marker);
+        })
+    })
+    log('清單綁定完成')
+}
+
+
+/* callback function */
 
 //執行navigator.geolocation.getCurrentPosition成功的函式
 //會執行callback function取得position物件
@@ -108,178 +276,119 @@ function GetPosError(){
     modal('無法取得位置')
 }
 
-//呼叫google map api將目前位置放置於地圖上
-function CurrentPos(){
-    currentLocation = JSON.parse(localStorage.getItem('location'))
-    map = new google.maps.Map(document.querySelector('#map'),{zoom: 16,center:currentLocation})
-    //設定目前位置座標
-    let marker = new google.maps.Marker({
-        position:currentLocation,
-    })
-    //設定infowindow
-    let infowindow = new google.maps.InfoWindow({
-        content : '<div class="currentPos">目前位置</div>'
-    })
-    //開啟infowindow
-    infowindow.open(map,marker)  
-    marker.addListener('click', function() {
-            infowindow.open(map,marker)
-    })
-    //指定圖標要出現的地圖
-    marker.setMap(map)
-}
-
-//將上述函式包裝一次執行
-function GetCurrentPos(){
-    Position()
-    setTimeout(CurrentPos(),100)
-}
-
-//設定搜尋半徑
-function SearchRadiusChange(value){
-    let setRadius = Number($('#search').text())
-    let changeIndex = (searchRadius.indexOf(setRadius) + value + searchRadius.length) % searchRadius.length
-    index = searchRadius[changeIndex]
-
-    return $('#search').html(searchRadius[changeIndex])
-}
-
-//取得目標位置
-function GetPosTarget(target){
-    CurrentPos()
-    radius = $('#search').text()
-
-    //發送要給nearbysearch請求的內容
-    let NearbyRequest = {
-        location: currentLocation,
-        radius: radius,
-        type: [target],
-        openNow: true
-    }
-
-    RadiusCircle()
-
-    //建立新服務並呼叫api處理
-    service = new google.maps.places.PlacesService(map)
-    service.nearbySearch(NearbyRequest, NearBySearch)
-}
-
 //呼叫google map 的nearbysearch要callback的函式
 function NearBySearch(results, status ,pagination){
     if (status === google.maps.places.PlacesServiceStatus.OK) {
-        
-        for (let i = 0;i < results.length;i++){
-            CreateData(results[i])
-        }
-        // log(pagination.hasNextPage)
+        log('地點搜尋中')
+
+        // forEach取得每一筆資料,避免query_limit所以加上setTimeout進行delay
+        results.forEach((place,index) => {
+            setTimeout(() =>{
+                getDetails(place)
+            },index * 300)
+        })
+
+        //google map最多呼叫1頁=20筆資料,接收額外回傳的資料判斷是否有下一頁
+        //最多可取得3頁=60筆資料
         if (pagination.hasNextPage) {
-            log('讀取中')
-            $('#loading').css('opacity','1')
-            //google map最多呼叫1頁=20筆資料,接收額外回傳的資料判斷是否有下一頁
-            pagination.nextPage()
-            
+            log('尚有資料')
+            $('.more').css({'opacity':'1','display':'block'})
+
+            $('.more').on('click',() => {
+                $('#loading').css({'opacity':'1','display':'block'})
+                sleep(2000).then(() => {
+                    pagination.nextPage()
+                })
+            })
         }else{
-            log('讀取完畢')
-            $('#loading').css('opacity','0')
-            getData = JSON.parse(localStorage.getItem('search'))
-
-            for(let j = 0;j < getData.length;j++){
-                setTimeout(function(){
-                    // log(j)
-                    marker = new google.maps.Marker({
-                        position: getData[j].location,
-                        animation: google.maps.Animation.DROP,
-                        map: map
-                    })
-
-                    let request = {
-                        placeId:getData[j].placeId
-                    }
-                    log(getData[j].location)
-                    service = new google.maps.places.PlacesService(map);
-                    service.getDetails(request, Details)
-                }, j * 400)
-            }
+            log('沒有更多資料了')
+            $('.more').css('opacity','0')
         }
+
+        // 等待所有項目渲染到網頁上再將各個項目綁定點擊事件
+        setTimeout(()=>{
+            ListClick()
+            $('#loading').css({'opacity':'0','display':'none'})
+        },results.length * 305)
+
+    }else if(status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS){
+        $('#loading').css({'opacity':'0','display':'none'})
+        modal('沒有選取的目標地點!')
+        $('.search-item').html('沒有搜尋到目標')
     }else{
-        modal('沒有目標地點')
+        log(status)
+        $('#loading').css({'opacity':'0','display':'none'})
+        modal('Woops!出現錯誤!')
     }
-}
-
-//將nearbysearch取得的所有地點存入localstorage
-function CreateData(place) {
-    // log(place)
-    let position = JSON.parse(localStorage.getItem('search'))
-    let data = {
-        location:place.geometry.location,
-        placeId:place.place_id
-    } 
-    position.push(data)
-    newData = JSON.stringify(position)
-    localStorage.setItem('search',newData)
-}
-
-//搜尋半徑顯示
-function RadiusCircle(){
-    CurrentPos()
-    let cicrle = new google.maps.Circle({
-        strokeColor: '#00bfff',
-        strokeOpacity: 0.5,
-        strokeWeight: 2,
-        fillColor: '#87cefa',
-        fillOpacity: 0.35,
-        map: map,
-        center: currentLocation,
-        radius: Number(radius)
-    });
 }
 
 //呼叫google map的place deatil要callback的函式
 function Details(details,status){
     if(status == google.maps.places.PlacesServiceStatus.OK){
-        // log(details)
-        getData = JSON.parse(localStorage.getItem('search'))
 
-        let rating = details.rating
-
-        if(rating){
-            rating = rating + '<i class="fas fa-star">'
+        //判斷是否有評價
+        let rating
+        
+        if(details.rating){
+            rating = details.rating
         }else{
-            rating = '沒有評價'
+            rating = '沒有評價' 
         }
 
-        infowindow = new google.maps.InfoWindow();
-        infowindow.setContent(
-            details.name
-        )
+        //判斷是否有營業時間
+        let open_hours,IsOpenNow
 
-        infowindow.open(map, marker);
-        log(marker)
-        //注意使用clocure確保每個infowindwo對應各自的marker
-        //如果不使用clocure則會導致外層的marker已執行完畢再來執行infowindow，導致最後所有infowindow全部綁定在最後的marker
-        google.maps.event.addListener(marker,'click', (function(marker,infowindow) {
-            return function() {
-            infowindow.setContent(
-                '<div>名稱:' + details.name + '</div>' +
-                '<div>評價:' + rating + '</i></div>' +
-                '<div>地址:' + details.formatted_address + '</div>' + 
-                '<div><a href="' + details.url +'">googlemap中開啟</a></div>'
-                )
-            infowindow.open(map, marker);
+        if(details.opening_hours){
+            open_hours = details.opening_hours.weekday_text
+            if(details.opening_hours.isOpen()){
+                IsOpenNow = '<span class="badge badge-success float-right">營業中</span>'
+            }else{
+                IsOpenNow = '<span class="badge badge-danger float-right">尚未營業</span>'
             }
-        })(marker,infowindow))
+        }else{
+            open_hours = '沒有營業時間資料'
+            IsOpenNow = '<span class="badge badge-warning float-right">沒有營業時間資料</span>'
+        }
+
+        //將nearbysearch取得的所有地點存入localstorage
+        let palce_details = JSON.parse(localStorage.getItem('search_results'))
+        
+        // 寫入localstorage且經過處理的資料
+        let data = {
+            location:details.geometry.location,
+            name:details.name,
+            address: details.vicinity,
+            rating: rating,
+            phone_number: details.formatted_phone_number,
+            opening_hours: open_hours,
+            IsOpen: IsOpenNow, 
+            url: details.url
+        }
+
+        palce_details.push(data)
+        newData = JSON.stringify(palce_details)
+        localStorage.setItem('search_results',newData)
+
+        log('資料寫入完成')
+
+        // 設置圖標
+        marker = new google.maps.Marker({
+            position: data.location,
+            animation: google.maps.Animation.DROP,
+            map: map
+        })
+
+        // 渲染出處理過資料的項目
+        $('.search-item').append(
+            `
+            <button class="btn btn-outline-info btn-lg btn-block mb-3 place" type="button"">
+                ${details.name}
+                ${IsOpenNow}
+            </button>
+            `
+        )
+        log('項目渲染完成')
     }else{
         log(status)
     }
-}
-
-//重置localstorage中的search陣列
-function ResetLocal(){
-    localStorage.setItem('search','[]')
-}
-
-//bootstrap4彈出式提示視窗
-function modal(content){
-    $('#Modal').modal('show')
-    $('.modal-body').html(content)
 }
