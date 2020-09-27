@@ -24,7 +24,6 @@ Jquery
 bootstrap 4  
 * Google maps api
   - Maps JavaScript API
-  - Places API
 
 ## 實作筆記
 
