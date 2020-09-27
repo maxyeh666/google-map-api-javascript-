@@ -5,7 +5,7 @@ https://maxyeh666.github.io/google-map-api-javascript-/
 <img src="https://github.com/maxyeh666/google-map-api-javascript-/blob/master/qrcode.png">
 
 ## 製作目標
-個人休假喜歡出去旅遊,將一些常用的功能根據自喜的喜好做些快速使用的調整
+個人休假喜歡出去旅遊,將一些常用的功能根據喜好做些快速使用的調整。
 
 ## 功能
 功能陸續根據使用情況更新
